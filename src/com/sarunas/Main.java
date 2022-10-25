@@ -1,14 +1,14 @@
 package com.sarunas;
 
-import java.util.ArrayList;
+
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
-        ArrayList<String> cardNumber = new ArrayList<>();
-        ArrayList<String> cardPIN = new ArrayList<>();
+        HashMap<String, String> creditCard = new HashMap<>();
         int balance = 0;
         boolean bankSystem = true;
         while (bankSystem) {
@@ -27,34 +27,33 @@ public class Main {
                     for (int i = 0; i < 10; i++) {
                         newCard += random.nextInt(9);
                     }
-                    if (cardNumber.contains(newCard)) {
+                    if (creditCard.containsKey(newCard)) {
                         System.out.println("Card number exists");
                     } else {
-                        cardNumber.add(newCard);
+                        String pin = "";
+                        for (int i = 0; i < 4; i++) {
+                            pin += random.nextInt(9);
+                        }
+                        creditCard.put(newCard, pin);
+                        //cardPIN.add(pin);
+                        System.out.println();
+                        System.out.println("Your card has been created");
+                        System.out.println("Your card number:");
+                        System.out.println(newCard);
+                        System.out.println("Your card PIN:");
+                        System.out.println(pin);
                     }
-                    String pin = "";
-                    for (int i = 0; i < 4; i++) {
-                        pin += random.nextInt(9);
-                    }
-                    cardPIN.add(pin);
-                    System.out.println();
-                    System.out.println("Your card has been created");
-                    System.out.println("Your card number:");
-                    System.out.println(newCard);
-                    System.out.println("Your card PIN:");
-                    System.out.println(pin);
                     break;
                 case "2":
                     System.out.println();
                     System.out.println("Enter your card number:");
                     System.out.print(">");
                     String existingCardNumber = scanner.nextLine();
-                    if (cardNumber.contains(existingCardNumber)) {
+                    if (creditCard.containsKey(existingCardNumber)) {
                         System.out.println("Enter your PIN:");
                         System.out.print(">");
-                        int cardIndex = cardNumber.indexOf(existingCardNumber);
                         String cardsPin = scanner.nextLine();
-                        if (cardsPin.equals(cardPIN.get(cardIndex))) {
+                        if (cardsPin.equals(creditCard.get(existingCardNumber))) {
                             System.out.println();
                             System.out.println("You have successfully logged in!");
                             boolean login = true;
@@ -95,7 +94,7 @@ public class Main {
             }
         }
     }
-
+}
 
 
 //    public static ArrayList<String> creditCard() {
@@ -132,4 +131,4 @@ public class Main {
 //        ArrayList<String> cardPIN = createPIN();
 //        return true;
 //    }
-}
+
