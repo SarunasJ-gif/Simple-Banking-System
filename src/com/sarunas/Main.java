@@ -8,6 +8,8 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
+        Random random = new Random();
+        random.setSeed(10);
         HashMap<String, String> creditCard = new HashMap<>();
         int balance = 0;
         boolean bankSystem = true;
@@ -22,20 +24,17 @@ public class Main {
             String choice = scanner.nextLine();
             switch (choice) {
                 case "1":
-                    String newCard = "400000";
-                    Random random = new Random();
-                    for (int i = 0; i < 10; i++) {
-                        newCard += random.nextInt(9);
-                    }
+
+                    String newCard = newCardNumber(random);
                     if (creditCard.containsKey(newCard)) {
                         System.out.println("Card number exists");
                     } else {
                         String pin = "";
                         for (int i = 0; i < 4; i++) {
-                            pin += random.nextInt(9);
+
+                            pin += random.nextInt(0, 10);
                         }
                         creditCard.put(newCard, pin);
-                        //cardPIN.add(pin);
                         System.out.println();
                         System.out.println("Your card has been created");
                         System.out.println("Your card number:");
@@ -94,8 +93,38 @@ public class Main {
             }
         }
     }
-}
 
+    public static String newCardNumber(Random rand) {
+        String newCard = "400000";
+        // Random rand = new Random();
+        for (int i = 0; i < 9; i++) {
+            newCard += rand.nextInt(0, 10);
+        }
+        String[] array = newCard.split("");
+
+        int[] numbers = new int[15];
+        int sum = 0;
+        for (int i = 0; i < numbers.length; i++) {
+            numbers[i] = Integer.parseInt(array[i]);
+            if ((i + 1) % 2 != 0) {
+                numbers[i] *= 2;
+            }
+            if (numbers[i] > 9) {
+                numbers[i] -= 9;
+            }
+            sum += numbers[i];
+        }
+
+        while (true) {
+            int lastNumber = rand.nextInt(0, 10);
+            if ((sum + lastNumber) % 10 == 0) {
+                newCard += lastNumber;
+                break;
+            }
+        }
+        return newCard;
+    }
+}
 
 //    public static ArrayList<String> creditCard() {
 //        ArrayList<String> cardNumber = new ArrayList<>();
