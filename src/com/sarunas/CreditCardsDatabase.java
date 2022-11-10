@@ -1,10 +1,7 @@
 package com.sarunas;
 
 import org.sqlite.SQLiteDataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class CreditCardsDatabase {
 
@@ -30,6 +27,7 @@ public class CreditCardsDatabase {
         }
     }
 
+
     public void insertData(Connection con, String cardNumber, String cardPin, int balance) throws SQLException {
         String insertValues = String.format("INSERT or IGNORE INTO cards(number, pin, balance) VALUES('%s', '%s', %d)", cardNumber, cardPin, balance);
         Statement statement = con.createStatement();
@@ -48,6 +46,7 @@ public class CreditCardsDatabase {
         return balance;
     }
 
+
     public String getPin(Connection con, String number) throws SQLException {
         String pin = "";
         String query = String.format("SELECT pin FROM cards WHERE number = '%s'", number);
@@ -58,5 +57,67 @@ public class CreditCardsDatabase {
         }
         rs.close();
         return pin;
+    }
+
+
+    public void addIncome(Connection connection, String cardNumber, int amount) {
+        String updateBalance = "UPDATE cards SET balance = balance + ? WHERE number = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(updateBalance)) {
+            preparedStatement.setInt(1, amount);
+            preparedStatement.setString(2, cardNumber);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+
+    public void closeAccount(Connection connection, String cardNumber) {
+        String deleteAccount = "DELETE FROM cards WHERE number = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(deleteAccount)) {
+            preparedStatement.setString(1, cardNumber);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public boolean checkCardNumberExists(Connection connection, String cardNumber) {
+        String query = "SELECT number FROM cards WHERE number = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, cardNumber);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+
+    public void transferMoney(Connection connection, String cardNumberToLogin, String cardNumberToTransfer, int amount) throws SQLException {
+        String accountTransferMoneyFrom = "UPDATE cards SET balance = balance - ? WHERE number = ?";
+        String accountTransferMoneyTo = "UPDATE cards SET balance = balance + ? WHERE number = ?";
+        connection.setAutoCommit(false);
+        try (PreparedStatement transferFrom = connection.prepareStatement(accountTransferMoneyFrom);
+             PreparedStatement transferTo = connection.prepareStatement(accountTransferMoneyTo)) {
+
+            transferFrom.setInt(1, amount);
+            transferFrom.setString(2, cardNumberToLogin);
+            transferFrom.executeUpdate();
+
+            transferTo.setInt(1, amount);
+            transferTo.setString(2, cardNumberToTransfer);
+            transferTo.executeUpdate();
+
+            connection.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
